@@ -1,6 +1,85 @@
+var URL_CALL_PAGE = ""
+var pagina_atual = 0;
+var modify_data_function = null;
 
-function preenchePaginacao(data) {
-    var num_paginas = (data.recordsTotal / data.recordsFiltered);
+array = [
+
+    {
+        nome: "beto",
+        idade: 25
+    },
+     {
+        nome: "beto",
+        idade: 25
+    },
+     {
+        nome: "beto",
+        idade: 25
+    },
+     {
+        nome: "beto",
+        idade: 25
+    },
+     {
+        nome: "beto",
+        idade: 25
+    },
+     {
+        nome: "beto",
+        idade: 25
+    },
+     {
+        nome: "beto",
+        idade: 25
+    },
+     {
+        nome: "beto",
+        idade: 25
+    },
+     {
+        nome: "beto",
+        idade: 25
+    },
+     {
+        nome: "beto",
+        idade: 25
+    },
+     {
+        nome: "beto",
+        idade: 25
+    },
+     {
+        nome: "beto",
+        idade: 25
+    },
+     {
+        nome: "beto",
+        idade: 25
+    },
+     {
+        nome: "beto",
+        idade: 25
+    },
+     {
+        nome: "beto",
+        idade: 25
+    },
+    {
+        nome: "beto",
+        idade: 25
+    },
+    
+]
+
+var datatable ={
+    
+    data:array,
+    recordsTotal:502,
+    recordsFiltered :3
+}
+array = []
+function preenchePaginacao(recordsTotal,recordsFiltered) {
+    var num_paginas = (recordsTotal / recordsFiltered);
     num = (Math.ceil(num_paginas)) + 1;
     array = [];
     cont = 0
@@ -8,7 +87,7 @@ function preenchePaginacao(data) {
     array[cont] = []
 
     for (let index = 1; index < num; index++) {
-        array[cont].push('<button  onclick="(function(){getPage(' + index + ');})()"" class="click-pagina mdl-button" aria-controls="example" data-dt-idx="2" tabindex="0">' + index + '</button>');
+        array[cont].push('<button  onclick="(function(){getData(' + index + ');})()"" class="click-pagina mdl-button" aria-controls="example" data-dt-idx="2" tabindex="0">' + index + '</button>');
         cont2 += 1;
         if (cont2 == 10) {
             cont += 1;
@@ -19,7 +98,6 @@ function preenchePaginacao(data) {
 }
 
 function pagina(num = 0) {
-    console.log(num)
     $('.pagination').html("");
     for (let index = 0; index < array[num].length; index++) {
         $('.pagination').append(array[num][index]);
@@ -60,6 +138,7 @@ function verifica_prev(pagina_atual) {
 
 
 function preencheColunas(id,data){
+    console.log(data);
     var table   = document.getElementById(id);
     var columns = []
     var body = document.getElementsByTagName('tbody')[0]
@@ -108,10 +187,10 @@ function getkeyJson(json){
     return Object.keys(json);
 }
 
-function getData(url,page){
-    let url_final = url;
+function getData(page){
+    let url_final = URL_CALL_PAGE;
     if(page){
-        url_final = url+"/"+page
+        url_final = URL_CALL_PAGE+"/"+page
     }
     return new Promise(function(resolve,reject){
         $.ajax({
@@ -124,29 +203,52 @@ function getData(url,page){
     })
 }
 
+function addFooter(id){
+    $('#'+id).append(
+    '<div class="dataTables_paginate paging_simple_numbers roda-pe-paginacao" id="example_paginate">'+
+      '<button onclick="prev()"  id="prev"  disabled="disabled">Voltar</button>'+
+    '<div class="pagination">'+                  
+      '</div>'+
+      '<button id = "next" onclick="next()">Avançar</button>'+
+ '</div>')
+    
+}
 
-function initSimpleTablePagination(id,modify_data_function){
+function pagina(num = 0) {
+    $('.pagination').html("");
+    for (let index = 0; index < array[num].length; index++) {
+        $('.pagination').append(array[num][index]);
+
+    }
+}
+
+
+function initSimpleTablePagination(id,modify){
     return new Promise (function(resolve,reject){
 
     var start_page  =  document.getElementById(id).getAttribute("start-page");
-    var url_page    =  document.getElementById(id).getAttribute("url");
-
-    var new_data = {};
-
-        getData(url_page,start_page).then(function(data){
-            
-            if(typeof modify_data_function === 'function' ){
-                new_data =  modify_data_function(data);
-            }else{
-                new_data = data;
-            }
-            
-            preencheColunas(id,new_data);
-            resolve("sucess table");
-
-        });
+    URL_CALL_PAGE    =  document.getElementById(id).getAttribute("url");
+    modify_data_function = modify;
+    getPageSucess(id,start_page)
+    addFooter(id);
 
     })
 }
 
+function getPageSucess(id,start_page){
+    var new_data = {};
+    getData(start_page).then(function(data){
+            
+        if(typeof modify_data_function === 'function' ){
+            new_data =  modify_data_function(data);
+        }else{
+            new_data = data;
+        }
+        preencheColunas(id,new_data);
+        preenchePaginacao(new_data.recordsTotal,new_data.recordsFiltered);
+        pagina();
+        verifica_next(0);
+    });
+
+}
 //initSimpleTablePagination('table',trata_data);
